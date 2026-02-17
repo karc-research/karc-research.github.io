@@ -8,27 +8,30 @@ import iconCollaboration from '../../assets/icons/icon-collaboration.png'
 import iconFamily from '../../assets/icons/icon-family.png'
 import iconDna from '../../assets/icons/icon-dna.png'
 import iconDatabase from '../../assets/icons/icon-database.png'
+import logoSnu from '../../assets/logos/snu.png'
 import logoKoreaUniv from '../../assets/logos/korea-univ.png'
+import logoKyunghee from '../../assets/logos/kyunghee.png'
 import logoIbs from '../../assets/logos/ibs.png'
 import logoEwha from '../../assets/logos/ewha.png'
 import logoKonkuk from '../../assets/logos/konkuk.png'
 import logoKaist from '../../assets/logos/kaist.png'
 import logoSkku from '../../assets/logos/skku.png'
+import logoCnu from '../../assets/logos/cnu.png'
 
 const institutions = [
   { name: 'SNUBH', name_ko: '분당서울대병원', logo: null },
   { name: 'Korea Univ.', name_ko: '고려대학교', logo: logoKoreaUniv },
-  { name: 'SNU', name_ko: '서울대학교', logo: null },
-  { name: 'Kyung Hee Univ.', name_ko: '경희대학교', logo: null },
+  { name: 'SNU', name_ko: '서울대학교', logo: logoSnu },
+  { name: 'Kyung Hee Univ.', name_ko: '경희대학교', logo: logoKyunghee },
   { name: 'IBS', name_ko: '기초과학연구원', logo: logoIbs },
   { name: 'Ewha Womans Univ.', name_ko: '이화여자대학교', logo: logoEwha },
   { name: 'KISTI', name_ko: 'KISTI', logo: null },
-  { name: 'CHA Univ.', name_ko: '차의과학대학교', logo: null },
+  { name: 'CHA Hospital', name_ko: '차병원', logo: null },
   { name: 'Konkuk Univ.', name_ko: '건국대학교', logo: logoKonkuk },
   { name: 'KAIST', name_ko: 'KAIST', logo: logoKaist },
   { name: 'DGIST', name_ko: 'DGIST', logo: null },
   { name: 'SKKU', name_ko: '성균관대학교', logo: logoSkku },
-  { name: 'CNU', name_ko: '충남대학교', logo: null },
+  { name: 'CNU', name_ko: '충남대학교', logo: logoCnu },
 ]
 
 const stats = [
