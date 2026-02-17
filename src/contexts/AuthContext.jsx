@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
@@ -7,6 +8,8 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     if (!supabase) {
@@ -24,11 +27,16 @@ export function AuthProvider({ children }) {
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         setUser(session?.user ?? null)
         if (session?.user) {
           setLoading(true)
           fetchProfile(session.user.id)
+          // Redirect to pending page after email confirmation (signup callback)
+          if (event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
+            window.location.hash = ''
+            navigate('/pending', { replace: true })
+          }
         } else {
           setProfile(null)
           setLoading(false)
@@ -59,7 +67,10 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName, institution } },
+      options: {
+        data: { full_name: fullName, institution },
+        emailRedirectTo: `${window.location.origin}/karc/`,
+      },
     })
     return { data, error }
   }

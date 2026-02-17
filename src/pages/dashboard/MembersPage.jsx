@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../../lib/supabase'
+import { supabase, logActivity } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLang } from '../../contexts/LangContext'
 import { Badge } from '@/components/ui/badge'
@@ -30,21 +30,59 @@ export default function MembersPage() {
   async function fetchMembers() {
     const { data } = await supabase
       .from('profiles')
-      .select('id, full_name, role, approved, created_at, institution')
+      .select('id, full_name, email, role, approved, created_at, institution')
       .order('created_at', { ascending: false })
     setMembers(data || [])
     setLoading(false)
   }
 
-  async function toggleApproval(member) {
-    const newApproved = !member.approved
+  async function handleApprove(member) {
     await supabase
       .from('profiles')
       .update({
-        approved: newApproved,
-        approved_at: newApproved ? new Date().toISOString() : null,
+        approved: true,
+        approved_at: new Date().toISOString(),
       })
       .eq('id', member.id)
+    await logActivity('member_approved', member.full_name || member.email)
+
+    // Send welcome email via Edge Function
+    try {
+      await supabase.functions.invoke('send-welcome-email', {
+        body: {
+          email: member.email,
+          name: member.full_name || '',
+        },
+      })
+    } catch {
+      // Edge Function not deployed yet — approval still works
+    }
+
+    fetchMembers()
+  }
+
+  async function handleReject(member) {
+    const msg = lang === 'ko'
+      ? `${member.full_name || member.email}의 가입 신청을 거절하시겠습니까? 프로필이 삭제됩니다.`
+      : `Reject ${member.full_name || member.email}? Their profile will be deleted.`
+    if (!confirm(msg)) return
+
+    await supabase.from('profiles').delete().eq('id', member.id)
+    await logActivity('member_rejected', member.full_name || member.email)
+    fetchMembers()
+  }
+
+  async function handleRevoke(member) {
+    const msg = lang === 'ko'
+      ? `${member.full_name}의 승인을 취소하시겠습니까?`
+      : `Revoke approval for ${member.full_name}?`
+    if (!confirm(msg)) return
+
+    await supabase
+      .from('profiles')
+      .update({ approved: false, approved_at: null })
+      .eq('id', member.id)
+    await logActivity('member_revoked', member.full_name || member.email)
     fetchMembers()
   }
 
@@ -90,6 +128,7 @@ export default function MembersPage() {
                 <TableHeader>
                   <TableRow className="border-b border-yellow-200">
                     <TableHead className="py-3 px-4">{lang === 'ko' ? '이름' : 'Name'}</TableHead>
+                    <TableHead className="py-3 px-4">{lang === 'ko' ? '이메일' : 'Email'}</TableHead>
                     <TableHead className="py-3 px-4">{lang === 'ko' ? '소속' : 'Institution'}</TableHead>
                     <TableHead className="py-3 px-4">{lang === 'ko' ? '가입일' : 'Joined'}</TableHead>
                     {isAdmin && <TableHead className="py-3 px-4">{lang === 'ko' ? '관리' : 'Action'}</TableHead>}
@@ -99,15 +138,21 @@ export default function MembersPage() {
                   {pendingMembers.map((m) => (
                     <TableRow key={m.id} className="border-b border-yellow-100">
                       <TableCell className="py-3 px-4 font-medium text-slate-900">{m.full_name || '-'}</TableCell>
+                      <TableCell className="py-3 px-4 text-sm text-slate-600">{m.email || '-'}</TableCell>
                       <TableCell className="py-3 px-4 text-slate-600">{m.institution || '-'}</TableCell>
                       <TableCell className="py-3 px-4 text-sm text-slate-500">
                         {new Date(m.created_at).toLocaleDateString()}
                       </TableCell>
                       {isAdmin && (
                         <TableCell className="py-3 px-4">
-                          <Button size="sm" onClick={() => toggleApproval(m)} className="bg-green-600 hover:bg-green-700">
-                            {lang === 'ko' ? '승인' : 'Approve'}
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={() => handleApprove(m)} className="bg-green-600 hover:bg-green-700">
+                              {lang === 'ko' ? '승인' : 'Approve'}
+                            </Button>
+                            <Button size="sm" variant="destructive" onClick={() => handleReject(m)}>
+                              {lang === 'ko' ? '거절' : 'Reject'}
+                            </Button>
+                          </div>
                         </TableCell>
                       )}
                     </TableRow>
@@ -161,7 +206,7 @@ export default function MembersPage() {
                     </TableCell>
                     {isAdmin && (
                       <TableCell className="py-3 px-4">
-                        <Button variant="ghost" size="sm" onClick={() => toggleApproval(m)} className="text-red-600 hover:text-red-700">
+                        <Button variant="ghost" size="sm" onClick={() => handleRevoke(m)} className="text-red-600 hover:text-red-700">
                           {lang === 'ko' ? '승인 취소' : 'Revoke'}
                         </Button>
                       </TableCell>
