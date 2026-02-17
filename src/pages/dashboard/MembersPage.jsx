@@ -9,10 +9,11 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 const roleBadge = {
   admin: 'bg-red-100 text-red-700',
   researcher: 'bg-blue-100 text-blue-700',
+  coordinator: 'bg-purple-100 text-purple-700',
   viewer: 'bg-gray-100 text-gray-600',
 }
 
-const roleOptions = ['admin', 'researcher', 'viewer']
+const roleOptions = ['admin', 'researcher', 'coordinator', 'viewer']
 
 export default function MembersPage() {
   const { role } = useAuth()

@@ -5,13 +5,12 @@ import { useState } from 'react'
 import logo from '../../assets/icons/logo.png'
 
 export default function Navbar() {
-  const { isAuthenticated, logout, role } = useAuth()
+  const { isAuthenticated, logout } = useAuth()
   const { lang, toggleLang, t } = useLang()
   const location = useLocation()
-  const isDashboard = location.pathname.startsWith('/dashboard')
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  const publicLinks = [
+  const links = [
     { to: '/', label: t('nav.home') },
     { to: '/about', label: t('nav.about') },
     { to: '/research', label: t('nav.research') },
@@ -19,16 +18,6 @@ export default function Navbar() {
     // { to: '/participate', label: t('nav.participate') },  // Hidden until IRB approval
     { to: '/support', label: t('nav.support') },
   ]
-
-  const dashboardLinks = [
-    { to: '/dashboard', label: t('nav.overview') },
-    { to: '/dashboard/variants', label: t('nav.variants') },
-    { to: '/dashboard/reports', label: t('nav.reports') },
-    { to: '/dashboard/researchers', label: t('nav.researchers') },
-    ...(role === 'admin' ? [{ to: '/dashboard/members', label: t('nav.members') }] : []),
-  ]
-
-  const links = isDashboard ? dashboardLinks : publicLinks
 
   return (
     <nav className="border-b border-gray-200 bg-white">
@@ -63,28 +52,14 @@ export default function Navbar() {
                 {lang === 'en' ? '한국어' : 'EN'}
               </button>
 
-              {isAuthenticated && (
+              {isAuthenticated ? (
                 <>
-                  {!isDashboard && (
-                    <Link
-                      to="/dashboard"
-                      className="text-sm font-medium text-primary-600 hover:text-primary-700 px-3 py-2"
-                    >
-                      {t('nav.dashboard')}
-                    </Link>
-                  )}
-                  {isDashboard && (
-                    <Link
-                      to="/dashboard/profile"
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        location.pathname === '/dashboard/profile'
-                          ? 'text-primary-700 bg-primary-50'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-gray-50'
-                      }`}
-                    >
-                      {t('nav.profile')}
-                    </Link>
-                  )}
+                  <Link
+                    to="/dashboard"
+                    className="text-sm font-medium text-primary-600 hover:text-primary-700 px-3 py-2"
+                  >
+                    {t('nav.dashboard')}
+                  </Link>
                   <button
                     onClick={logout}
                     className="text-sm font-medium text-slate-500 hover:text-slate-700 px-3 py-2"
@@ -92,6 +67,13 @@ export default function Navbar() {
                     {t('nav.logout')}
                   </button>
                 </>
+              ) : (
+                <Link
+                  to="/login"
+                  className="text-sm font-medium text-primary-600 hover:text-primary-700 px-3 py-2"
+                >
+                  {t('nav.login')}
+                </Link>
               )}
             </div>
           </div>
@@ -134,13 +116,30 @@ export default function Navbar() {
             >
               {lang === 'en' ? '한국어로 보기' : 'Switch to English'}
             </button>
-            {isAuthenticated && (
-              <button
-                onClick={() => { logout(); setMobileOpen(false) }}
-                className="block w-full text-left px-3 py-2 text-sm font-medium text-slate-500"
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="block px-3 py-2 text-sm font-medium text-primary-600"
+                >
+                  {t('nav.dashboard')}
+                </Link>
+                <button
+                  onClick={() => { logout(); setMobileOpen(false) }}
+                  className="block w-full text-left px-3 py-2 text-sm font-medium text-slate-500"
+                >
+                  {t('nav.logout')}
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMobileOpen(false)}
+                className="block px-3 py-2 text-sm font-medium text-primary-600"
               >
-                {t('nav.logout')}
-              </button>
+                {t('nav.login')}
+              </Link>
             )}
           </div>
         )}

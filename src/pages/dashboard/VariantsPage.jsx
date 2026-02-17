@@ -6,26 +6,41 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Download } from 'lucide-react'
+import * as XLSX from 'xlsx'
 import VariantTable from '../../components/dashboard/VariantTable'
 
 const PAGE_SIZE = 20
 
-const typeOptions = ['missense', 'nonsense', 'frameshift', 'splice', 'indel']
-const significanceOptions = ['pathogenic', 'likely_pathogenic', 'vus', 'benign']
 const inheritanceOptions = ['de_novo', 'inherited', 'unknown']
+const statusOptions = ['available', 'requested', 'in_progress', 'completed']
+const consequenceOptions = [
+  'missense_variant',
+  'stop_gained',
+  'frameshift_variant',
+  'splice_donor_variant',
+  'splice_acceptor_variant',
+  'inframe_deletion',
+  'inframe_insertion',
+  'start_lost',
+  'stop_lost',
+  'synonymous_variant',
+]
 
 const emptyForm = {
   gene: '',
   variant: '',
-  type: 'missense',
-  significance: 'vus',
-  families: 0,
+  consequence: '',
+  protein_change: '',
   chromosome: '',
   position: '',
   ref_allele: '',
   alt_allele: '',
   transcript: '',
+  sample_id: '',
+  rank: '',
   inheritance: 'unknown',
+  status: 'available',
   notes: '',
 }
 
@@ -35,6 +50,8 @@ export default function VariantsPage() {
   const fileInputRef = useRef(null)
 
   const canEdit = role === 'admin' || role === 'researcher'
+  const isAdmin = role === 'admin'
+  const canUpload = role === 'admin' || role === 'coordinator'
 
   const [variants, setVariants] = useState([])
   const [loading, setLoading] = useState(true)
@@ -43,20 +60,42 @@ export default function VariantsPage() {
 
   // Filters
   const [search, setSearch] = useState('')
-  const [typeFilter, setTypeFilter] = useState('')
-  const [sigFilter, setSigFilter] = useState('')
+  const [rankFilter, setRankFilter] = useState('')
+  const [rankOptions, setRankOptions] = useState([])
+
+  // Sort
+  const [sortField, setSortField] = useState('created_at')
+  const [sortDir, setSortDir] = useState('desc')
 
   // Modal
   const [showModal, setShowModal] = useState(false)
   const [editingVariant, setEditingVariant] = useState(null)
   const [form, setForm] = useState(emptyForm)
 
-  // CSV
-  const [csvResult, setCsvResult] = useState(null)
+  // Selection
+  const [selectedIds, setSelectedIds] = useState(new Set())
+
+  // Upload result
+  const [uploadResult, setUploadResult] = useState(null)
 
   useEffect(() => {
     fetchVariants()
-  }, [page, search, typeFilter, sigFilter])
+  }, [page, search, rankFilter, sortField, sortDir])
+
+  useEffect(() => {
+    fetchRankOptions()
+  }, [])
+
+  async function fetchRankOptions() {
+    if (!supabase) return
+    const { data } = await supabase
+      .from('variants')
+      .select('rank')
+      .not('rank', 'is', null)
+      .limit(500)
+    const unique = [...new Set((data || []).map((r) => r.rank).filter(Boolean))].sort()
+    setRankOptions(unique)
+  }
 
   async function fetchVariants() {
     if (!supabase) { setLoading(false); return }
@@ -64,17 +103,14 @@ export default function VariantsPage() {
 
     let query = supabase
       .from('variants')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
+      .select('*, created_by_profile:profiles(full_name)', { count: 'exact' })
+      .order(sortField, { ascending: sortDir === 'asc' })
 
     if (search) {
-      query = query.or(`gene.ilike.%${search}%,variant.ilike.%${search}%`)
+      query = query.or(`gene.ilike.%${search}%,variant.ilike.%${search}%,sample_id.ilike.%${search}%,protein_change.ilike.%${search}%`)
     }
-    if (typeFilter) {
-      query = query.eq('type', typeFilter)
-    }
-    if (sigFilter) {
-      query = query.eq('significance', sigFilter)
+    if (rankFilter) {
+      query = query.eq('rank', rankFilter)
     }
 
     const from = page * PAGE_SIZE
@@ -84,7 +120,18 @@ export default function VariantsPage() {
     const { data, count } = await query
     setVariants(data || [])
     setTotalCount(count || 0)
+    setSelectedIds(new Set())
     setLoading(false)
+  }
+
+  function handleSort(field) {
+    if (sortField === field) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortField(field)
+      setSortDir('asc')
+    }
+    setPage(0)
   }
 
   // Search debounce
@@ -108,15 +155,17 @@ export default function VariantsPage() {
     setForm({
       gene: v.gene,
       variant: v.variant,
-      type: v.type,
-      significance: v.significance,
-      families: v.families || 0,
+      consequence: v.consequence || '',
+      protein_change: v.protein_change || '',
       chromosome: v.chromosome || '',
       position: v.position || '',
       ref_allele: v.ref_allele || '',
       alt_allele: v.alt_allele || '',
       transcript: v.transcript || '',
+      sample_id: v.sample_id || '',
+      rank: v.rank || '',
       inheritance: v.inheritance || 'unknown',
+      status: v.status || 'available',
       notes: v.notes || '',
     })
     setShowModal(true)
@@ -127,7 +176,6 @@ export default function VariantsPage() {
     const payload = {
       ...form,
       position: form.position ? Number(form.position) : null,
-      families: Number(form.families) || 0,
       updated_at: new Date().toISOString(),
     }
 
@@ -149,56 +197,102 @@ export default function VariantsPage() {
     if (!confirm(t('variants.confirmDelete'))) return
     await supabase.from('variants').delete().eq('id', v.id)
     await logActivity('variant_deleted', `${v.gene} ${v.variant}`)
+    setSelectedIds(new Set())
     fetchVariants()
   }
 
-  async function handleCsvUpload(e) {
+  async function handleBulkDelete() {
+    const count = selectedIds.size
+    const msg = lang === 'ko'
+      ? `선택한 ${count}개 변이를 삭제하시겠습니까?`
+      : `Delete ${count} selected variant${count > 1 ? 's' : ''}?`
+    if (!confirm(msg)) return
+    const ids = [...selectedIds]
+    await supabase.from('variants').delete().in('id', ids)
+    await logActivity('variants_bulk_deleted', `${count} variants`)
+    setSelectedIds(new Set())
+    fetchVariants()
+  }
+
+  function handleDownloadTemplate() {
+    const templateData = [
+      {
+        gene: 'SHANK3',
+        variant: 'c.1234A>G',
+        consequence: 'missense_variant',
+        protein_change: 'p.Arg412Gly',
+        chromosome: '22',
+        position: 51135990,
+        ref_allele: 'A',
+        alt_allele: 'G',
+        transcript: 'ENST00000262795',
+        sample_id: 'KARC-001',
+        rank: '1',
+        inheritance: 'de_novo',
+        notes: 'Example entry',
+      },
+    ]
+    const ws = XLSX.utils.json_to_sheet(templateData)
+    const colWidths = Object.keys(templateData[0]).map((key) => ({ wch: Math.max(key.length, 18) }))
+    ws['!cols'] = colWidths
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Variants')
+    XLSX.writeFile(wb, 'karc_variants_template.xlsx')
+  }
+
+  async function handleExcelUpload(e) {
     const file = e.target.files?.[0]
     if (!file) return
-    setCsvResult(null)
+    setUploadResult(null)
 
-    const text = await file.text()
-    const lines = text.split('\n').map((l) => l.trim()).filter(Boolean)
-    if (lines.length < 2) return
+    const data = await file.arrayBuffer()
+    const wb = XLSX.read(data)
+    const ws = wb.Sheets[wb.SheetNames[0]]
+    const jsonRows = XLSX.utils.sheet_to_json(ws)
 
-    const headers = lines[0].split(',').map((h) => h.trim().toLowerCase())
-    const requiredCols = ['gene', 'variant', 'type', 'significance']
+    if (jsonRows.length === 0) {
+      setUploadResult({ success: 0, fail: 0, error: 'Empty file' })
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+
+    const requiredCols = ['gene', 'variant']
+    const headers = Object.keys(jsonRows[0]).map((h) => h.toLowerCase().trim())
     const missing = requiredCols.filter((c) => !headers.includes(c))
     if (missing.length > 0) {
-      setCsvResult({ success: 0, fail: 0, error: `Missing columns: ${missing.join(', ')}` })
+      setUploadResult({ success: 0, fail: 0, error: `Missing columns: ${missing.join(', ')}` })
       if (fileInputRef.current) fileInputRef.current.value = ''
       return
     }
 
     const { data: { user } } = await supabase.auth.getUser()
-    const rows = []
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map((v) => v.trim())
-      const row = {}
-      headers.forEach((h, idx) => { row[h] = values[idx] || '' })
-      rows.push({
-        gene: row.gene,
-        variant: row.variant,
-        type: row.type,
-        significance: row.significance,
-        families: Number(row.families) || 0,
-        chromosome: row.chromosome || null,
-        position: row.position ? Number(row.position) : null,
-        ref_allele: row.ref_allele || null,
-        alt_allele: row.alt_allele || null,
-        transcript: row.transcript || null,
-        inheritance: row.inheritance || null,
-        notes: row.notes || null,
+    const rows = jsonRows.map((row) => {
+      const r = {}
+      Object.entries(row).forEach(([key, val]) => { r[key.toLowerCase().trim()] = val })
+      return {
+        gene: String(r.gene || ''),
+        variant: String(r.variant || ''),
+        consequence: r.consequence ? String(r.consequence) : null,
+        protein_change: r.protein_change ? String(r.protein_change) : null,
+        chromosome: r.chromosome ? String(r.chromosome) : null,
+        position: r.position ? Number(r.position) : null,
+        ref_allele: r.ref_allele ? String(r.ref_allele) : null,
+        alt_allele: r.alt_allele ? String(r.alt_allele) : null,
+        transcript: r.transcript ? String(r.transcript) : null,
+        sample_id: r.sample_id ? String(r.sample_id) : null,
+        rank: r.rank != null ? String(r.rank) : null,
+        inheritance: r.inheritance ? String(r.inheritance) : null,
+        notes: r.notes ? String(r.notes) : null,
         created_by: user?.id,
-      })
-    }
+      }
+    })
 
     const { error } = await supabase.from('variants').insert(rows)
     if (error) {
-      setCsvResult({ success: 0, fail: rows.length, error: error.message })
+      setUploadResult({ success: 0, fail: rows.length, error: error.message })
     } else {
-      setCsvResult({ success: rows.length, fail: 0 })
-      await logActivity('variants_csv_uploaded', `${rows.length} variants from ${file.name}`)
+      setUploadResult({ success: rows.length, fail: 0 })
+      await logActivity('variants_excel_uploaded', `${rows.length} variants from ${file.name}`)
     }
 
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -218,36 +312,44 @@ export default function VariantsPage() {
             <h1 className="text-2xl font-bold text-slate-900">{t('variants.title')}</h1>
             <p className="mt-1 text-sm text-slate-500">{t('variants.desc')}</p>
           </div>
-          {canEdit && (
-            <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            {canEdit && (
               <Button onClick={openAddModal}>
                 {t('variants.addVariant')}
               </Button>
-              <label className="cursor-pointer">
-                <Button variant="outline" asChild>
-                  <span>
-                    {t('variants.uploadCsv')}
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".csv"
-                      onChange={handleCsvUpload}
-                      className="hidden"
-                    />
-                  </span>
+            )}
+            {canUpload && (
+              <>
+                <label className="cursor-pointer">
+                  <Button variant="outline" asChild>
+                    <span>
+                      {t('variants.uploadExcel')}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".xlsx,.xls"
+                        onChange={handleExcelUpload}
+                        className="hidden"
+                      />
+                    </span>
+                  </Button>
+                </label>
+                <Button variant="outline" onClick={handleDownloadTemplate}>
+                  <Download className="h-4 w-4" />
+                  {t('variants.downloadTemplate')}
                 </Button>
-              </label>
-            </div>
-          )}
+              </>
+            )}
+          </div>
         </div>
 
-        {/* CSV result */}
-        {csvResult && (
-          <div className={`mb-4 rounded-md p-3 text-sm ${csvResult.error ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
-            {csvResult.error
-              ? `${t('variants.uploadFail')}: ${csvResult.error}`
-              : `${t('variants.uploadSuccess')}: ${csvResult.success} ${t('variants.rows')}`}
-            <button onClick={() => setCsvResult(null)} className="ml-2 font-medium underline">
+        {/* Upload result */}
+        {uploadResult && (
+          <div className={`mb-4 rounded-md p-3 text-sm ${uploadResult.error ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+            {uploadResult.error
+              ? `${t('variants.uploadFail')}: ${uploadResult.error}`
+              : `${t('variants.uploadSuccess')}: ${uploadResult.success} ${t('variants.rows')}`}
+            <button onClick={() => setUploadResult(null)} className="ml-2 font-medium underline">
               &times;
             </button>
           </div>
@@ -263,26 +365,35 @@ export default function VariantsPage() {
             className="w-auto"
           />
           <select
-            value={typeFilter}
-            onChange={(e) => { setTypeFilter(e.target.value); setPage(0) }}
+            value={rankFilter}
+            onChange={(e) => { setRankFilter(e.target.value); setPage(0) }}
             className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none"
           >
-            <option value="">{t('variants.allTypes')}</option>
-            {typeOptions.map((o) => (
-              <option key={o} value={o}>{o}</option>
-            ))}
-          </select>
-          <select
-            value={sigFilter}
-            onChange={(e) => { setSigFilter(e.target.value); setPage(0) }}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none"
-          >
-            <option value="">{t('variants.allSignificance')}</option>
-            {significanceOptions.map((o) => (
-              <option key={o} value={o}>{o}</option>
+            <option value="">{t('variants.allRanks')}</option>
+            {rankOptions.map((r) => (
+              <option key={r} value={r}>{r}</option>
             ))}
           </select>
         </div>
+
+        {/* Bulk action bar */}
+        {selectedIds.size > 0 && (
+          <div className="mb-4 flex items-center gap-3 rounded-md bg-primary-50 border border-primary-200 px-4 py-2">
+            <span className="text-sm font-medium text-primary-700">
+              {lang === 'ko'
+                ? `${selectedIds.size}개 선택됨`
+                : `${selectedIds.size} selected`}
+            </span>
+            {isAdmin && (
+              <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+                {t('variants.delete')}
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
+              {t('variants.cancel')}
+            </Button>
+          </div>
+        )}
 
         {/* Table */}
         {loading ? (
@@ -293,8 +404,15 @@ export default function VariantsPage() {
           <VariantTable
             variants={variants}
             canEdit={canEdit}
+            isAdmin={isAdmin}
             onEdit={openEditModal}
             onDelete={handleDelete}
+            sortField={sortField}
+            sortDir={sortDir}
+            onSort={handleSort}
+            selectedIds={selectedIds}
+            onSelectChange={setSelectedIds}
+            onRefresh={fetchVariants}
           />
         )}
 
@@ -338,43 +456,63 @@ export default function VariantsPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{t('variants.gene')} *</Label>
-                <Input type="text" value={form.gene} onChange={(e) => setForm({ ...form, gene: e.target.value })} />
+                <Input type="text" value={form.gene} onChange={(e) => setForm({ ...form, gene: e.target.value })} placeholder="SHANK3" />
               </div>
               <div className="space-y-2">
                 <Label>{t('variants.variant')} *</Label>
-                <Input type="text" value={form.variant} onChange={(e) => setForm({ ...form, variant: e.target.value })} />
+                <Input type="text" value={form.variant} onChange={(e) => setForm({ ...form, variant: e.target.value })} placeholder="c.1234A>G" />
               </div>
               <div className="space-y-2">
-                <Label>{t('variants.type')} *</Label>
-                <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
+                <Label>{t('variants.consequence')}</Label>
+                <select value={form.consequence} onChange={(e) => setForm({ ...form, consequence: e.target.value })}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none">
-                  {typeOptions.map((o) => <option key={o} value={o}>{o}</option>)}
+                  <option value="">—</option>
+                  {consequenceOptions.map((o) => <option key={o} value={o}>{o.replace(/_/g, ' ')}</option>)}
                 </select>
               </div>
               <div className="space-y-2">
-                <Label>{t('variants.significance')} *</Label>
-                <select value={form.significance} onChange={(e) => setForm({ ...form, significance: e.target.value })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none">
-                  {significanceOptions.map((o) => <option key={o} value={o}>{o}</option>)}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label>{t('variants.families')}</Label>
-                <Input type="number" value={form.families} onChange={(e) => setForm({ ...form, families: e.target.value })} />
+                <Label>{t('variants.proteinChange')}</Label>
+                <Input type="text" value={form.protein_change} onChange={(e) => setForm({ ...form, protein_change: e.target.value })} placeholder="p.Arg412Gly" />
               </div>
               <div className="space-y-2">
                 <Label>{t('variants.chromosome')}</Label>
-                <Input type="text" value={form.chromosome} onChange={(e) => setForm({ ...form, chromosome: e.target.value })} />
+                <Input type="text" value={form.chromosome} onChange={(e) => setForm({ ...form, chromosome: e.target.value })} placeholder="22" />
               </div>
               <div className="space-y-2">
                 <Label>{t('variants.position')}</Label>
-                <Input type="number" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} />
+                <Input type="number" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} placeholder="51135990" />
+              </div>
+              <div className="space-y-2">
+                <Label>Ref / Alt</Label>
+                <div className="flex gap-2">
+                  <Input type="text" value={form.ref_allele} onChange={(e) => setForm({ ...form, ref_allele: e.target.value })} placeholder="Ref" />
+                  <Input type="text" value={form.alt_allele} onChange={(e) => setForm({ ...form, alt_allele: e.target.value })} placeholder="Alt" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('variants.transcript')}</Label>
+                <Input type="text" value={form.transcript} onChange={(e) => setForm({ ...form, transcript: e.target.value })} placeholder="ENST00000262795" />
+              </div>
+              <div className="space-y-2">
+                <Label>{t('variants.sampleId')}</Label>
+                <Input type="text" value={form.sample_id} onChange={(e) => setForm({ ...form, sample_id: e.target.value })} placeholder="KARC-001" />
+              </div>
+              <div className="space-y-2">
+                <Label>{t('variants.rank')}</Label>
+                <Input type="text" value={form.rank} onChange={(e) => setForm({ ...form, rank: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label>{t('variants.inheritance')}</Label>
                 <select value={form.inheritance} onChange={(e) => setForm({ ...form, inheritance: e.target.value })}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none">
                   {inheritanceOptions.map((o) => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('variants.status')}</Label>
+                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none">
+                  {statusOptions.map((o) => <option key={o} value={o}>{t(`variants.status.${o}`)}</option>)}
                 </select>
               </div>
               <div className="col-span-2 space-y-2">

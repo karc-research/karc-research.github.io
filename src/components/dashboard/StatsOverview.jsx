@@ -9,7 +9,7 @@ export default function StatsOverview() {
     variants: 0,
     researchers: 0,
     reports: 0,
-    families: 0,
+    announcements: 0,
   })
   const [loading, setLoading] = useState(true)
 
@@ -23,23 +23,18 @@ export default function StatsOverview() {
       return
     }
 
-    const [variantsRes, researchersRes, reportsRes, familiesRes] = await Promise.all([
+    const [variantsRes, researchersRes, reportsRes, announcementsRes] = await Promise.all([
       supabase.from('variants').select('*', { count: 'exact', head: true }),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('approved', true),
       supabase.from('reports').select('*', { count: 'exact', head: true }),
-      supabase.from('variants').select('families'),
+      supabase.from('announcements').select('*', { count: 'exact', head: true }),
     ])
-
-    const totalFamilies = (familiesRes.data || []).reduce(
-      (sum, v) => sum + (v.families || 0),
-      0
-    )
 
     setCounts({
       variants: variantsRes.count || 0,
       researchers: researchersRes.count || 0,
       reports: reportsRes.count || 0,
-      families: totalFamilies,
+      announcements: announcementsRes.count || 0,
     })
     setLoading(false)
   }
@@ -48,7 +43,7 @@ export default function StatsOverview() {
     { label: t('stats.variants'), value: counts.variants.toLocaleString() },
     { label: t('stats.researchers'), value: counts.researchers.toLocaleString() },
     { label: t('stats.reports'), value: counts.reports.toLocaleString() },
-    { label: t('stats.families'), value: counts.families.toLocaleString() },
+    { label: t('nav.announcements'), value: counts.announcements.toLocaleString() },
   ]
 
   return (
