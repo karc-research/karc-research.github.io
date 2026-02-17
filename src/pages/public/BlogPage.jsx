@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useLang } from '../../contexts/LangContext'
 import { Card, CardContent } from '@/components/ui/card'
-import iconCollaboration from '../../assets/icons/icon-collaboration.png'
+import iconBlog from '../../assets/icons/icon-blog.png'
 
 export default function BlogPage() {
   const { t, lang } = useLang()
@@ -38,7 +38,7 @@ export default function BlogPage() {
       {/* Header */}
       <section className="bg-gradient-to-b from-primary-50 to-white py-16">
         <div className="mx-auto max-w-6xl px-4 flex items-start gap-6">
-          <img src={iconCollaboration} alt="" className="hidden sm:block h-20 w-20 object-contain flex-shrink-0 mt-1" />
+          <img src={iconBlog} alt="" className="hidden sm:block h-20 w-20 object-contain flex-shrink-0 mt-1" />
           <div>
             <h1 className="text-4xl font-bold text-slate-900">{t('blog.title')}</h1>
             <p className="mt-4 max-w-3xl text-xl text-slate-600 leading-relaxed">

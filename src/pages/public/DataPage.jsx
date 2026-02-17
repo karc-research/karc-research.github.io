@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
-import iconKoreaDna from '../../assets/icons/icon-korea-dna.png'
+import iconData from '../../assets/icons/icon-data.png'
 
 const datasets = [
   {
@@ -49,7 +49,7 @@ export default function DataPage() {
       {/* Header */}
       <section className="bg-gradient-to-b from-primary-50 to-white py-16">
         <div className="mx-auto max-w-6xl px-4 flex items-start gap-6">
-          <img src={iconKoreaDna} alt="" className="hidden sm:block h-20 w-20 object-contain flex-shrink-0 mt-1" />
+          <img src={iconData} alt="" className="hidden sm:block h-20 w-20 object-contain flex-shrink-0 mt-1" />
           <div>
             <h1 className="text-4xl font-bold text-slate-900">{t('data.title')}</h1>
             <p className="mt-4 max-w-3xl text-xl text-slate-600 leading-relaxed">
