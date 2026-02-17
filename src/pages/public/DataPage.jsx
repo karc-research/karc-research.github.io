@@ -4,18 +4,7 @@ import iconKoreaDna from '../../assets/icons/icon-korea-dna.png'
 
 const datasets = [
   {
-    name: 'WES',
-    fullName_en: 'Whole Exome Sequencing',
-    fullName_ko: '전장엑솜 시퀀싱',
-    families: '61',
-    participants: '250',
-    platform: 'Illumina HiSeq X',
-    depth: '~150X',
-    pipeline: 'GATK (GRCh38)',
-    status: 'Completed',
-  },
-  {
-    name: 'srWGS',
+    name: 'WGS (Illumina)',
     fullName_en: 'Short-read Whole Genome Sequencing',
     fullName_ko: '단일리드 전장유전체 시퀀싱',
     families: '1,145',
@@ -26,7 +15,7 @@ const datasets = [
     status: 'Completed',
   },
   {
-    name: 'lrWGS',
+    name: 'WGS (PacBio)',
     fullName_en: 'Long-read Whole Genome Sequencing',
     fullName_ko: '롱리드 전장유전체 시퀀싱',
     families: '122',
@@ -35,6 +24,17 @@ const datasets = [
     depth: '~30X',
     pipeline: '-',
     status: 'In progress',
+  },
+  {
+    name: 'WES',
+    fullName_en: 'Whole Exome Sequencing',
+    fullName_ko: '전장엑솜 시퀀싱',
+    families: '61',
+    participants: '250',
+    platform: 'Illumina HiSeq X',
+    depth: '~150X',
+    pipeline: 'GATK (GRCh38)',
+    status: 'Completed',
   },
 ]
 

@@ -108,8 +108,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-slate-900">{t('about.institutions')}</h2>
           {areas.map((area) => (
             <div key={area} className="mt-6">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
-                <img src={areaLabels[area].icon} alt="" className="h-8 w-8 object-contain" />
+              <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
                 {areaLabels[area][lang]}
               </h3>
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

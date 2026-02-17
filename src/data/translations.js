@@ -117,7 +117,7 @@ const translations = {
   'about.pipeline.step2': { en: 'Genomic Analysis', ko: '기전 해석' },
   'about.pipeline.step2.desc': {
     en: 'Multi-platform sequencing (WES, srWGS, lrWGS) and variant analysis to uncover genetic mechanisms',
-    ko: '다중 플랫폼 시퀀싱(WES, srWGS, lrWGS)과 변이 분석을 통한 유전적 기전 규명',
+    ko: '대규모 유전체 분석을 통한 유전적 조성 규명',
   },
   'about.pipeline.step3': { en: 'Functional Validation', ko: '기능 검증' },
   'about.pipeline.step3.desc': {
