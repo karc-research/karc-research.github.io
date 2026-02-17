@@ -79,6 +79,10 @@ export function AuthProvider({ children }) {
     setProfile(null)
   }
 
+  async function refreshProfile() {
+    if (user) await fetchProfile(user.id)
+  }
+
   const value = {
     user,
     profile,
@@ -86,6 +90,7 @@ export function AuthProvider({ children }) {
     signup,
     login,
     logout,
+    refreshProfile,
     isAuthenticated: !!user,
     role: profile?.role ?? 'public',
   }

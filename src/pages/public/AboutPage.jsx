@@ -28,7 +28,7 @@ const members = [
   { name: 'Stephan Sanders', institution: 'Oxford', area: 'International' },
   { name: 'Stephen Scherer', institution: 'Toronto Univ.', area: 'International' },
   { name: 'Anders Børglum', institution: 'Aarhus Univ.', area: 'International' },
-  { name: 'Gloria Choi', institution: 'MIT', area: 'International' },
+  { name: 'Jakob Grove', institution: 'Aarhus Univ.', area: 'International' },
 ]
 
 const areaLabels = {
