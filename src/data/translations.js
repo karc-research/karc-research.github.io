@@ -16,6 +16,7 @@ const translations = {
   'nav.profile': { en: 'Profile', ko: '프로필' },
   'nav.members': { en: 'Members', ko: '회원 관리' },
   'nav.announcements': { en: 'Announcements', ko: '공지사항' },
+  'nav.blog': { en: 'Blog', ko: '블로그' },
   'nav.backToSite': { en: 'Back to Site', ko: '사이트로 돌아가기' },
 
   // Hero
@@ -323,6 +324,16 @@ const translations = {
   'announcements.pinThis': { en: 'Pin this announcement', ko: '이 공지를 상단에 고정' },
   'announcements.noAnnouncements': { en: 'No announcements yet', ko: '공지사항이 없습니다' },
   'announcements.by': { en: 'by', ko: '작성자' },
+
+  // Blog
+  'blog.title': { en: 'Blog', ko: '블로그' },
+  'blog.subtitle': { en: 'News and updates from K-ARC', ko: 'K-ARC 소식' },
+  'blog.readMore': { en: 'Read More', ko: '자세히 보기' },
+  'blog.noPosts': { en: 'No posts yet', ko: '아직 포스트가 없습니다' },
+  'blog.backToList': { en: 'Back to Blog', ko: '블로그로 돌아가기' },
+  'blog.manage': { en: 'Blog Management', ko: '블로그 관리' },
+  'blog.newPost': { en: 'New Post', ko: '새 포스트' },
+  'blog.editPost': { en: 'Edit Post', ko: '포스트 수정' },
 
   // Comments
   'comments.noComments': { en: 'No comments yet. Be the first to comment.', ko: '아직 코멘트가 없습니다.' },

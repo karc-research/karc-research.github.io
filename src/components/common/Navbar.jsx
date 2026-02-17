@@ -15,6 +15,7 @@ export default function Navbar() {
     { to: '/about', label: t('nav.about') },
     { to: '/research', label: t('nav.research') },
     { to: '/data', label: t('nav.data') },
+    { to: '/blog', label: t('nav.blog') },
     // { to: '/participate', label: t('nav.participate') },  // Hidden until IRB approval
     { to: '/support', label: t('nav.support') },
   ]

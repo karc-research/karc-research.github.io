@@ -19,6 +19,9 @@ import ResearchersPage from './pages/dashboard/ResearchersPage'
 import ProfilePage from './pages/dashboard/ProfilePage'
 import MembersPage from './pages/dashboard/MembersPage'
 import AnnouncementsPage from './pages/dashboard/AnnouncementsPage'
+import BlogPage from './pages/public/BlogPage'
+import BlogPostPage from './pages/public/BlogPostPage'
+import BlogManagePage from './pages/dashboard/BlogManagePage'
 
 export default function App() {
   return (
@@ -31,6 +34,8 @@ export default function App() {
         <Route path="/data" element={<DataPage />} />
         {/* <Route path="/participate" element={<ParticipatePage />} /> */}{/* Hidden until IRB approval */}
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:id" element={<BlogPostPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/pending" element={<ProtectedRoute><PendingApprovalPage /></ProtectedRoute>} />
@@ -44,6 +49,7 @@ export default function App() {
         <Route path="/dashboard/researchers" element={<ResearchersPage />} />
         <Route path="/dashboard/announcements" element={<AnnouncementsPage />} />
         <Route path="/dashboard/profile" element={<ProfilePage />} />
+        <Route path="/dashboard/blog" element={<BlogManagePage />} />
         <Route path="/dashboard/members" element={<ProtectedRoute allowedRoles={['admin']}><MembersPage /></ProtectedRoute>} />
       </Route>
     </Routes>

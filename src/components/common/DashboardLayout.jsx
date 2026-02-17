@@ -11,6 +11,7 @@ import {
   FileText,
   Users,
   Megaphone,
+  PenSquare,
   UserCog,
   User,
   ArrowLeft,
@@ -31,6 +32,7 @@ export default function DashboardLayout() {
     { to: '/dashboard/reports', icon: FileText, label: t('nav.reports') },
     { to: '/dashboard/researchers', icon: Users, label: t('nav.researchers') },
     { to: '/dashboard/announcements', icon: Megaphone, label: t('nav.announcements') },
+    ...((role === 'admin' || role === 'coordinator') ? [{ to: '/dashboard/blog', icon: PenSquare, label: t('nav.blog') }] : []),
     ...(role === 'admin' ? [{ to: '/dashboard/members', icon: UserCog, label: t('nav.members') }] : []),
   ]
 
