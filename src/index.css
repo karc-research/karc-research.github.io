@@ -10,8 +10,8 @@
   --card-foreground: oklch(0.145 0.013 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0.013 285.823);
-  --primary: oklch(0.546 0.245 262.881);
-  --primary-foreground: oklch(0.985 0.002 247.858);
+  --primary: oklch(0.373 0.281 264.052);
+  --primary-foreground: oklch(0.97 0.01 264);
   --secondary: oklch(0.967 0.003 264.542);
   --secondary-foreground: oklch(0.21 0.028 285.823);
   --muted: oklch(0.967 0.003 264.542);
@@ -22,22 +22,24 @@
   --destructive-foreground: oklch(0.985 0.002 247.858);
   --border: oklch(0.922 0.004 264.542);
   --input: oklch(0.922 0.004 264.542);
-  --ring: oklch(0.546 0.245 262.881);
+  --ring: oklch(0.373 0.281 264.052);
   --radius: 0.625rem;
 }
 
 @theme inline {
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 
-  /* Existing primary palette */
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a5f;
+  /* Autism Awareness palette */
+  --color-primary-50: #f2f2ff;
+  --color-primary-100: #e5e5ff;
+  --color-primary-200: #c7c7ff;
+  --color-primary-300: #9999ff;
+  --color-primary-400: #6666ff;
+  --color-primary-500: #3232ff;
+  --color-primary-600: #1919d6;
+  --color-primary-700: #00009a;
+  --color-primary-800: #000073;
+  --color-primary-900: #00004c;
 
   /* shadcn semantic colors */
   --color-background: var(--background);
