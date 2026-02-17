@@ -17,19 +17,23 @@ import logoKonkuk from '../../assets/logos/konkuk.png'
 import logoKaist from '../../assets/logos/kaist.png'
 import logoSkku from '../../assets/logos/skku.png'
 import logoCnu from '../../assets/logos/cnu.png'
+import logoSnubh from '../../assets/logos/snubh.png'
+import logoKisti from '../../assets/logos/kisti.png'
+import logoCha from '../../assets/logos/cha.png'
+import logoDgist from '../../assets/logos/dgist.png'
 
 const institutions = [
-  { name: 'SNUBH', name_ko: '분당서울대병원', logo: null },
+  { name: 'SNUBH', name_ko: '분당서울대병원', logo: logoSnubh },
   { name: 'Korea Univ.', name_ko: '고려대학교', logo: logoKoreaUniv },
   { name: 'SNU', name_ko: '서울대학교', logo: logoSnu },
   { name: 'Kyung Hee Univ.', name_ko: '경희대학교', logo: logoKyunghee },
   { name: 'IBS', name_ko: '기초과학연구원', logo: logoIbs },
   { name: 'Ewha Womans Univ.', name_ko: '이화여자대학교', logo: logoEwha },
-  { name: 'KISTI', name_ko: 'KISTI', logo: null },
-  { name: 'CHA Hospital', name_ko: '차병원', logo: null },
+  { name: 'KISTI', name_ko: 'KISTI', logo: logoKisti },
+  { name: 'CHA Hospital', name_ko: '강남차병원', logo: logoCha },
   { name: 'Konkuk Univ.', name_ko: '건국대학교', logo: logoKonkuk },
   { name: 'KAIST', name_ko: 'KAIST', logo: logoKaist },
-  { name: 'DGIST', name_ko: 'DGIST', logo: null },
+  { name: 'DGIST', name_ko: 'DGIST', logo: logoDgist },
   { name: 'SKKU', name_ko: '성균관대학교', logo: logoSkku },
   { name: 'CNU', name_ko: '충남대학교', logo: logoCnu },
 ]
