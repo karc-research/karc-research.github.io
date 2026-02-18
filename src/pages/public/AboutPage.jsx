@@ -44,12 +44,12 @@ const members = [
   { name: 'Prof. Sung-Oh Huh', name_ko: '허성오 교수', institution: 'Hallym Univ.', institution_ko: '한림대학교', area: 'Molecular' },
   { name: 'Prof. Sejin Jeon', name_ko: '전세진 교수', institution: 'Hallym Univ.', institution_ko: '한림대학교', area: 'Molecular' },
   // International
-  { name: 'Donna Werling', institution: 'UW Madison', area: 'International' },
-  { name: 'Stephan Sanders', institution: 'Univ. of Oxford', area: 'International' },
-  { name: 'Stephen Scherer', institution: 'Univ. of Toronto / SickKids Hospital', area: 'International' },
-  { name: 'Brett Trost', institution: 'Univ. of Toronto / SickKids Hospital', area: 'International' },
-  { name: 'Anders Børglum', institution: 'Aarhus Univ.', area: 'International' },
-  { name: 'Jakob Grove', institution: 'Aarhus Univ.', area: 'International' },
+  { name: 'Donna Werling', institution: 'UW Madison (USA)', area: 'International' },
+  { name: 'Stephan Sanders', institution: 'Univ. of Oxford (UK)', area: 'International' },
+  { name: 'Stephen Scherer', institution: 'Univ. of Toronto / SickKids Hospital (Canada)', area: 'International' },
+  { name: 'Brett Trost', institution: 'Univ. of Toronto / SickKids Hospital (Canada)', area: 'International' },
+  { name: 'Anders Børglum', institution: 'Aarhus Univ. (Denmark)', area: 'International' },
+  { name: 'Jakob Grove', institution: 'Aarhus Univ. (Denmark)', area: 'International' },
 ]
 
 const areaLabels = {
