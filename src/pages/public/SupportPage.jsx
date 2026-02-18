@@ -113,6 +113,27 @@ export default function SupportPage() {
         </div>
       </section>
 
+      {/* Next-generation researchers */}
+      <section className="py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <h2 className="text-2xl font-bold text-slate-900">
+            {lang === 'ko' ? '다음 세대 연구자를 위한 후원' : 'Investing in the Next Generation'}
+          </h2>
+          <div className="mt-6 rounded-lg border border-gray-200 bg-white p-8">
+            <p className="text-lg text-slate-700 leading-relaxed">
+              {lang === 'ko'
+                ? '자폐 연구는 한 세대의 노력으로 끝나지 않습니다. 지금의 연구를 이어받아 더 깊이 파고들 젊은 연구자들이 필요합니다. K-ARC는 대학원생과 박사후연구원들이 자폐 유전체 연구에 전념할 수 있도록 지원하고 있으며, 이들 중 일부는 이미 Oxford, Toronto 등 세계적인 연구 기관에서 활동하고 있습니다.'
+                : 'Autism research does not end with a single generation of effort. It requires young researchers who can carry forward and deepen the work. K-ARC supports graduate students and postdoctoral fellows dedicated to autism genomics, some of whom are already working at leading institutions such as Oxford and Toronto.'}
+            </p>
+            <p className="mt-4 text-lg text-slate-700 leading-relaxed">
+              {lang === 'ko'
+                ? '여러분의 후원은 이 연구자들이 안정적으로 연구에 집중할 수 있는 환경을 만듭니다. 자폐 연구의 깊이를 더하고, 한국에서 출발한 연구가 세계로 이어지는 흐름을 함께 만들어 주세요.'
+                : 'Your support helps create an environment where these researchers can focus on their work with stability. Help deepen the layers of autism research and sustain the flow of discoveries from Korea to the world.'}
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* How to support - Donation links */}
       <section className="bg-gray-50 py-16">
         <div className="mx-auto max-w-6xl px-4">

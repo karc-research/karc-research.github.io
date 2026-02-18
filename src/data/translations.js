@@ -111,6 +111,7 @@ const translations = {
   },
 
   'about.institutions': { en: 'Working Groups', ko: '워킹그룹' },
+  'about.fellows': { en: 'Future Fellows', ko: '차세대연구자' },
   'about.pipeline': { en: 'Research Pipeline', ko: '연구 파이프라인' },
   'about.pipeline.step1': { en: 'Clinical Assessment', ko: '임상 평가' },
   'about.pipeline.step1.desc': {
