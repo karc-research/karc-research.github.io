@@ -69,7 +69,7 @@ export function AuthProvider({ children }) {
       password,
       options: {
         data: { full_name: fullName, institution },
-        emailRedirectTo: `${window.location.origin}/karc/`,
+        emailRedirectTo: `${window.location.origin}/`,
       },
     })
     return { data, error }
