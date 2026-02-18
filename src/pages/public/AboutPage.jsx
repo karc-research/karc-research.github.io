@@ -94,31 +94,27 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Our Journey */}
-      <section className="py-16">
-        <div className="mx-auto max-w-6xl px-4">
-          <h2 className="text-2xl font-bold text-slate-900">{t('about.journey')}</h2>
-          <div className="mt-6 space-y-4">
-            <div className="rounded-lg border border-gray-200 bg-white p-8">
-              <p className="text-lg text-slate-700 leading-relaxed">
-                {lang === 'ko'
-                  ? 'K-ARC는 특별한 거대 연구비를 받아 시작된 프로젝트가 아닙니다. 해외에서는 SFARI나 MSSNG 같은 비영리 재단이 거액의 기부금을 바탕으로 수십 년간 자폐 연구를 이어왔지만, 한국에는 그런 기반이 없었습니다. 대신 개별 연구자들이 뜻을 모으고, 서로 협력하면서 지금까지 연구를 이어왔습니다.'
-                  : 'K-ARC was not born from a single large grant. Abroad, nonprofit foundations like SFARI and MSSNG have sustained autism research for decades through major philanthropic funding. In Korea, no such foundation existed. Instead, individual researchers came together, pooled their efforts, and built this consortium through collaboration.'}
-              </p>
-              <p className="mt-4 text-lg text-slate-700 leading-relaxed">
-                {lang === 'ko'
-                  ? '자폐 연구는 암이나 치매 연구에 비해 사회적 관심도, 투자도 크지 않은 것이 현실입니다. 그럼에도 과학적 근거를 쌓기 위해 연구자들이 경쟁보다 협력을 택했고, 그 결과 의미 있는 성과들을 만들어 왔습니다.'
-                  : 'The reality is that autism research receives far less attention and investment compared to fields like cancer or dementia. Despite this, researchers chose collaboration over competition, and together they have produced meaningful results.'}
-              </p>
-              <p className="mt-4 text-lg text-slate-700 leading-relaxed">
-                {lang === 'ko'
-                  ? '이제 K-ARC는 좋은 연구를 발표하면서 Oxford, Toronto, Aarhus 등 해외 연구자들과도 폭넓게 공동연구를 하고 있습니다. 한국의 자폐 연구가 국제적 수준으로 한 단계 더 나아가기 위해, 많은 연구자들이 함께 노력하고 있습니다.'
-                  : 'Today, K-ARC publishes impactful research and collaborates broadly with international partners at Oxford, Toronto, Aarhus, and beyond. Many researchers continue to work together so that autism research in Korea can reach the next level on the global stage.'}
-              </p>
+      {/* Our Journey (Korean only) */}
+      {lang === 'ko' && (
+        <section className="py-16">
+          <div className="mx-auto max-w-6xl px-4">
+            <h2 className="text-2xl font-bold text-slate-900">{t('about.journey')}</h2>
+            <div className="mt-6 space-y-4">
+              <div className="rounded-lg border border-gray-200 bg-white p-8">
+                <p className="text-lg text-slate-700 leading-relaxed">
+                  K-ARC는 특별한 거대 연구비를 받아 시작된 프로젝트가 아닙니다. 해외에서는 SFARI나 MSSNG 같은 비영리 재단이 거액의 기부금을 바탕으로 수십 년간 자폐 연구를 이어왔지만, 한국에는 그런 기반이 없었습니다. 대신 개별 연구자들이 뜻을 모으고, 서로 협력하면서 지금까지 연구를 이어왔습니다.
+                </p>
+                <p className="mt-4 text-lg text-slate-700 leading-relaxed">
+                  자폐 연구는 암이나 치매 연구에 비해 사회적 관심도, 투자도 크지 않은 것이 현실입니다. 그럼에도 과학적 근거를 쌓기 위해 연구자들이 경쟁보다 협력을 택했고, 그 결과 의미 있는 성과들을 만들어 왔습니다.
+                </p>
+                <p className="mt-4 text-lg text-slate-700 leading-relaxed">
+                  이제 K-ARC는 좋은 연구를 발표하면서 Oxford, Toronto, Aarhus 등 해외 연구자들과도 폭넓게 공동연구를 하고 있습니다. 한국의 자폐 연구가 국제적 수준으로 한 단계 더 나아가기 위해, 많은 연구자들이 함께 노력하고 있습니다.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Leadership */}
       <section className="py-16">
